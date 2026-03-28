@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 
 const ACCEPTED_AUDIO = 'audio/mpeg,audio/wav,audio/aac,audio/flac,audio/aiff'
 const ACCEPTED = `video/*,${ACCEPTED_AUDIO}`
@@ -28,14 +28,37 @@ function formatPreview(secs) {
   if (!secs || secs < 0) return ''
   const m = Math.floor(secs / 60)
   const s = Math.floor(secs % 60)
-  return `${m}m ${s}s`
+  return m > 0 ? `${m}m ${s}s` : `${s}s`
 }
 
 export default function VideoUploader({ onFileSelected, onStartBlank }) {
-  const [isDragActive, setIsDragActive] = useState(false)
-  const [showBlankForm, setShowBlankForm] = useState(false)
-  const [durationInput, setDurationInput] = useState('')
-  const inputRef = useRef(null)
+  const [isDragActive, setIsDragActive]   = useState(false)
+  const [showBlankModal, setShowBlankModal] = useState(false)
+  const [durationInput, setDurationInput]  = useState('')
+  const inputRef    = useRef(null)
+  const modalInputRef = useRef(null)
+
+  // Auto-focus the duration input when modal opens
+  useEffect(() => {
+    if (showBlankModal) {
+      setTimeout(() => modalInputRef.current?.focus(), 60)
+    }
+  }, [showBlankModal])
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!showBlankModal) return
+    function onKey(e) {
+      if (e.key === 'Escape') closeModal()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [showBlankModal])
+
+  function closeModal() {
+    setShowBlankModal(false)
+    setDurationInput('')
+  }
 
   function handleFile(file) {
     if (!file) return
@@ -43,96 +66,101 @@ export default function VideoUploader({ onFileSelected, onStartBlank }) {
     if (mode) onFileSelected(file, mode)
   }
 
-  function handleDragOver(e) {
-    e.preventDefault()
-    setIsDragActive(true)
-  }
+  function handleDragOver(e)  { e.preventDefault(); setIsDragActive(true) }
+  function handleDragLeave()  { setIsDragActive(false) }
+  function handleDrop(e)      { e.preventDefault(); setIsDragActive(false); handleFile(e.dataTransfer.files[0]) }
+  function handleInputChange(e) { handleFile(e.target.files[0]); e.target.value = '' }
 
-  function handleDragLeave() {
-    setIsDragActive(false)
-  }
-
-  function handleDrop(e) {
-    e.preventDefault()
-    setIsDragActive(false)
-    handleFile(e.dataTransfer.files[0])
-  }
-
-  function handleInputChange(e) {
-    handleFile(e.target.files[0])
-    e.target.value = ''
-  }
-
-  function handleBlankSubmit(e) {
-    e.preventDefault()
+  function handleBlankStart() {
     const secs = parseDurationInput(durationInput)
     if (secs && secs >= 10 && secs <= 10800) {
       onStartBlank(secs)
+      closeModal()
     }
   }
 
-  const parsedSecs = parseDurationInput(durationInput)
+  const parsedSecs    = parseDurationInput(durationInput)
   const isValidDuration = parsedSecs && parsedSecs >= 10 && parsedSecs <= 10800
 
   return (
-    <div className="uploader-wrap">
-      {/* Blank timeline — desktop: below drop zone; mobile: above via CSS order */}
-      <div className="blank-timeline-section">
-        {!showBlankForm ? (
+    <>
+      <div className="uploader-wrap">
+        {/* Blank timeline — desktop: below drop zone; mobile: above via CSS order */}
+        <div className="blank-timeline-section">
           <button
             className="btn blank-timeline-btn"
-            onClick={() => setShowBlankForm(true)}
+            onClick={() => setShowBlankModal(true)}
           >
             ⏱ Start with a blank timeline
           </button>
-        ) : (
-          <form className="blank-form" onSubmit={handleBlankSubmit}>
-            <span className="blank-form-label">Duration:</span>
-            <input
-              type="text"
-              className="blank-form-input"
-              placeholder="e.g. 2:30 or 150"
-              value={durationInput}
-              onChange={e => setDurationInput(e.target.value)}
-              autoFocus
-            />
-            {parsedSecs && (
-              <span className="blank-form-preview">
-                {isValidDuration ? formatPreview(parsedSecs) : 'min 10s, max 3h'}
-              </span>
-            )}
-            <button type="submit" className="btn btn-primary" disabled={!isValidDuration}>
-              Start
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => { setShowBlankForm(false); setDurationInput('') }}
-            >
-              Cancel
-            </button>
-          </form>
-        )}
+        </div>
+
+        <div
+          className={`drop-zone ${isDragActive ? 'drop-zone--active' : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            accept={ACCEPTED}
+            style={{ display: 'none' }}
+            onChange={handleInputChange}
+          />
+          <div className="drop-zone-icon">🎬</div>
+          <p className="drop-zone-text">Drop a video or audio file, or tap to browse</p>
+          <p className="drop-zone-hint">Video: mp4, mov, webm — Audio: mp3, wav, aac, flac, aiff</p>
+        </div>
       </div>
 
-      <div
-        className={`drop-zone ${isDragActive ? 'drop-zone--active' : ''}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPTED}
-          style={{ display: 'none' }}
-          onChange={handleInputChange}
-        />
-        <div className="drop-zone-icon">🎬</div>
-        <p className="drop-zone-text">Drop a video or audio file, or tap to browse</p>
-        <p className="drop-zone-hint">Video: mp4, mov, webm — Audio: mp3, wav, aac, flac, aiff</p>
-      </div>
-    </div>
+      {/* Blank timeline modal */}
+      {showBlankModal && (
+        <div className="modal-overlay" onMouseDown={closeModal}>
+          <div className="modal-card" onMouseDown={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">⏱ Blank timeline</h2>
+              <button className="modal-close-btn" onClick={closeModal} title="Close">×</button>
+            </div>
+
+            <div className="modal-body">
+              <p className="modal-desc">Set a duration, press play, then tap keyframes as time runs.</p>
+
+              <label className="modal-field-label" htmlFor="blank-dur-input">Duration</label>
+              <input
+                ref={modalInputRef}
+                id="blank-dur-input"
+                type="text"
+                className="modal-input"
+                placeholder="e.g. 2:30 or 150"
+                value={durationInput}
+                onChange={e => setDurationInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && isValidDuration && handleBlankStart()}
+              />
+              <div className="modal-preview">
+                {parsedSecs
+                  ? isValidDuration
+                    ? <span className="modal-preview--ok">→ {formatPreview(parsedSecs)}</span>
+                    : <span className="modal-preview--err">Min 10 s · Max 3 h</span>
+                  : <span className="modal-preview--hint">Enter minutes:seconds or total seconds</span>
+                }
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={closeModal}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={!isValidDuration}
+                onClick={handleBlankStart}
+              >
+                Start
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

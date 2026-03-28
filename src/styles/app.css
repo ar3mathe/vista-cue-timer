@@ -242,39 +242,43 @@ body {
   height: 100%;
 }
 
-/* Add keyframe button — big, bottom-right of timeline */
+/* ─── Add Keyframe button — pill, bottom-center of waveform ─────────────── */
 .add-keyframe-btn {
   position: absolute;
-  bottom: 26px;
-  right: 14px;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 10px 18px;
+  gap: 8px;
+  padding: 12px 28px;
   background: var(--accent-2);
   border: none;
-  border-radius: var(--radius);
+  border-radius: 50px;          /* full pill */
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 20px rgba(255,107,53,0.45);
   transition: background 0.12s, transform 0.08s, box-shadow 0.12s;
-  z-index: 5;
-  letter-spacing: 0.01em;
+  z-index: 10;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 .add-keyframe-btn:hover {
   background: #ff7f50;
-  box-shadow: 0 4px 18px rgba(255,107,53,0.35);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(255,107,53,0.5);
+  transform: translateX(-50%) translateY(-2px);
 }
 .add-keyframe-btn:active {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 .add-keyframe-btn-icon {
-  font-size: 11px;
-  opacity: 0.85;
+  font-size: 12px;
+  opacity: 0.9;
 }
+/* Invisible bottom padding so the ruler text doesn't sit under the button */
+.add-keyframe-spacer { height: 0; }
 
 /* ─── Keyframe panel ─────────────────────────────────────────────────────── */
 .keyframe-panel {
@@ -770,9 +774,9 @@ kbd {
 /* Show beats toggle */
 .show-beats-btn {
   position: absolute;
-  bottom: 26px;
-  right: 156px;
-  padding: 6px 11px;
+  top: 6px;
+  right: 10px;
+  padding: 4px 9px;
   background: rgba(0,0,0,0.5);
   border: 1px solid var(--border-2);
   border-radius: var(--radius-sm);
@@ -788,6 +792,120 @@ kbd {
   border-color: rgba(74,158,255,0.5);
   color: var(--accent);
 }
+
+/* ─── Blank timeline modal ───────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px 0;
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+
+.modal-close-btn {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s;
+  flex-shrink: 0;
+}
+.modal-close-btn:hover { background: var(--bg-4); color: var(--text); }
+
+.modal-body {
+  padding: 16px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.modal-field-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.modal-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  padding: 12px 14px;
+  transition: border-color 0.12s;
+  letter-spacing: 0.04em;
+}
+.modal-input:focus { outline: none; border-color: var(--accent); }
+.modal-input::placeholder { color: #3a3a3a; font-size: 18px; }
+
+.modal-preview {
+  font-size: 13px;
+  min-height: 18px;
+}
+.modal-preview--ok   { color: var(--success); }
+.modal-preview--err  { color: var(--danger); }
+.modal-preview--hint { color: #484848; }
+
+.modal-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.modal-footer .btn { min-width: 80px; justify-content: center; }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
@@ -997,17 +1115,25 @@ kbd {
     min-height: 110px;
   }
 
+  /* Fixed pill at bottom-center of screen on mobile */
   .add-keyframe-btn {
-    padding: 8px 13px;
-    font-size: 13px;
-    bottom: 30px;
-    right: 8px;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    padding: 15px 36px;
+    font-size: 16px;
+    z-index: 150;
+    box-shadow: 0 6px 28px rgba(255,107,53,0.55);
   }
+  .add-keyframe-btn:hover  { transform: translateX(-50%) translateY(-2px); }
+  .add-keyframe-btn:active { transform: translateX(-50%) translateY(0); }
 
-  .show-beats-btn {
-    bottom: 30px;
-    right: 130px;
-  }
+  /* Extra bottom padding so the ruler isn't hidden behind the fixed button */
+  .waveform-container { padding-bottom: 72px; }
+
+  .show-beats-btn { top: 6px; right: 8px; bottom: auto; }
 
   /* ── Uploader: blank timeline FIRST on mobile ── */
   .blank-timeline-section { order: 1; padding: 16px 16px 8px; }

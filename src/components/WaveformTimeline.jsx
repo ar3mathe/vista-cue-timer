@@ -486,6 +486,8 @@ export default function WaveformTimeline({
           ♩ {showBeats ? 'Beats on' : 'Beats off'}
         </button>
       )}
+      {/* Spacer so the fixed pill button doesn't overlap the ruler on mobile */}
+      {showAddButton && <div className="add-keyframe-spacer" />}
     </div>
   )
 }

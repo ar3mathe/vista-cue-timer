@@ -164,20 +164,13 @@ body {
   display: block;
 }
 
-/* ─── Floating pill controls ─────────────────────────────────────────────── */
-.left-column { position: relative; }   /* pill is absolute within left-column */
-
+/* ─── Playback pill controls ─────────────────────────────────────────────── */
 .video-controls {
-  position: absolute;
-  bottom: 90px;
-  left: 20px;
-  right: 20px;
-  z-index: 20;
-
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 7px 14px 7px 7px;
+  margin: 8px 16px;
 
   background: rgba(16, 16, 16, 0.90);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -1185,14 +1178,8 @@ kbd {
   /* ── Video element ── */
   .video-element { max-height: 200px; }
 
-  /* ── Pill flows in-document on mobile — sits between waveform and keyframe panel ── */
-  .video-controls {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    margin: 6px 10px 2px;
-  }
+  /* ── Pill margins on mobile ── */
+  .video-controls { margin: 6px 10px 2px; }
 
   /* ── Waveform ── */
   .waveform-container {

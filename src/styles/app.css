@@ -109,6 +109,21 @@ body {
 .btn-secondary { }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
 
+/* ─── Toolbar clear session button ──────────────────────────────────────── */
+.toolbar-clear-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  border-color: rgba(224, 82, 82, 0.4);
+  color: var(--danger);
+  background: rgba(224, 82, 82, 0.06);
+  white-space: nowrap;
+}
+.toolbar-clear-btn:hover {
+  background: rgba(224, 82, 82, 0.15);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
 /* ─── Drop zone ──────────────────────────────────────────────────────────── */
 .drop-zone {
   display: flex;
@@ -304,7 +319,7 @@ body {
   overflow: hidden;
   background: #000;
   position: relative;
-  min-height: 110px;
+  min-height: 200px;
 }
 
 .waveform-canvas {
@@ -1182,8 +1197,8 @@ kbd {
   /* ── Waveform ── */
   .waveform-container {
     flex: none;
-    height: 180px;
-    min-height: 180px;
+    height: 260px;
+    min-height: 260px;
   }
 
   /* Fixed pill at bottom-center of screen on mobile */
@@ -1201,8 +1216,7 @@ kbd {
   .add-keyframe-btn:hover  { transform: translateX(-50%) translateY(-2px); }
   .add-keyframe-btn:active { transform: translateX(-50%) translateY(0); }
 
-  /* Extra bottom padding so the ruler isn't hidden behind the fixed buttons */
-  .waveform-container { padding-bottom: 160px; }
+  /* No extra padding — fixed buttons float over the canvas without affecting its size */
 
   .show-beats-btn { top: 6px; right: 8px; bottom: auto; }
 

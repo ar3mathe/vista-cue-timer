@@ -172,10 +172,23 @@ export default function App() {
 
   const fileName = sourceFile?.name ?? ''
 
+  const handleClearSession = useCallback(() => {
+    if (sourceMode === 'blank') {
+      handleRemoveBlank()
+    } else {
+      handleFileSelected(null, null)
+    }
+  }, [sourceMode, handleRemoveBlank, handleFileSelected])
+
   return (
     <div className="app">
       <header className="toolbar">
         <div className="toolbar-brand">myCue</div>
+        {sourceMode && (
+          <button className="btn toolbar-clear-btn" onClick={handleClearSession}>
+            Clear session
+          </button>
+        )}
         <TimecodeToolbar
           displayMode={displayMode}
           frameRate={frameRate}

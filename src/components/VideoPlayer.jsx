@@ -184,9 +184,6 @@ export default function VideoPlayer({
 
           {/* Reset */}
           <button className="ctrl-icon-btn" onClick={onBlankReset} title="Reset to start">↺</button>
-
-          {/* Remove */}
-          <button className="ctrl-icon-btn ctrl-icon-btn--danger" onClick={onRemove} title="Remove">✕</button>
         </div>
       </div>
     )
@@ -223,10 +220,6 @@ export default function VideoPlayer({
         {/* Total time */}
         <span className="time-total">{formatCompact(duration)}</span>
 
-        {/* Remove */}
-        {onRemove && (
-          <button className="ctrl-icon-btn ctrl-icon-btn--danger" onClick={onRemove} title="Remove">✕</button>
-        )}
       </div>
     </div>
   )

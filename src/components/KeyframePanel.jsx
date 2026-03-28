@@ -88,15 +88,6 @@ export default function KeyframePanel({
       <div className="panel-header">
         <span className="panel-title">Keyframes</span>
         <span className="panel-count">{keyframes.length}</span>
-        {keyframes.length > 0 && (
-          <button
-            className="btn btn-sm btn-danger panel-clear-btn"
-            onClick={onClearAll}
-            title="Delete all keyframes"
-          >
-            Clear session
-          </button>
-        )}
       </div>
 
       {keyframes.length === 0 ? (

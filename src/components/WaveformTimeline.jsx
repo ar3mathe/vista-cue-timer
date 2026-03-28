@@ -90,7 +90,7 @@ export default function WaveformTimeline({
   const isScrubbingRef = useRef(false)
 
   const propsRef = useRef({})
-  propsRef.current = { waveformData, keyframes, currentTime, duration, displayMode, frameRate, isDecoding, decodeError, beatPositions, showBeats, sourceMode }
+  propsRef.current = { waveformData, keyframes, currentTime, duration, displayMode, frameRate, isDecoding, decodeError, beatPositions, showBeats, sourceMode, onSeek, onDragKeyframe }
 
   // ─── Drawing ─────────────────────────────────────────────────────────────────
 
@@ -412,11 +412,13 @@ export default function WaveformTimeline({
   }
 
   function timeAtX(x) {
+    const { duration } = propsRef.current   // always fresh — no stale closure risk
     const W = canvasRef.current.clientWidth
     return Math.max(0, Math.min(duration, (x / W) * duration))
   }
 
   function hitTestKeyframe(x) {
+    const { duration, keyframes } = propsRef.current
     const W = canvasRef.current.clientWidth
     if (!duration) return null
     for (const kf of keyframes) {
@@ -439,9 +441,9 @@ export default function WaveformTimeline({
     if (hitId) {
       isDraggingKeyframeRef.current = true
       draggingIdRef.current = hitId
-    } else if (duration > 0) {
+    } else if (propsRef.current.duration > 0) {
       isScrubbingRef.current = true
-      onSeek(timeAtX(x))
+      propsRef.current.onSeek(timeAtX(x))
     }
   }
 
@@ -460,11 +462,11 @@ export default function WaveformTimeline({
     }
     // Drag keyframe
     if (isDraggingKeyframeRef.current) {
-      onDragKeyframe(draggingIdRef.current, { time: timeAtX(x) })
+      propsRef.current.onDragKeyframe(draggingIdRef.current, { time: timeAtX(x) })
     }
     // Scrub playhead
     if (isScrubbingRef.current) {
-      onSeek(timeAtX(x))
+      propsRef.current.onSeek(timeAtX(x))
     }
   }
 
@@ -485,9 +487,9 @@ export default function WaveformTimeline({
     if (hitId) {
       isDraggingKeyframeRef.current = true
       draggingIdRef.current = hitId
-    } else if (duration > 0) {
+    } else if (propsRef.current.duration > 0) {
       isScrubbingRef.current = true
-      onSeek(timeAtX(x))
+      propsRef.current.onSeek(timeAtX(x))
     }
   }
 
@@ -496,9 +498,9 @@ export default function WaveformTimeline({
     e.preventDefault()
     const x = getTouchX(e)
     if (isDraggingKeyframeRef.current) {
-      onDragKeyframe(draggingIdRef.current, { time: timeAtX(x) })
+      propsRef.current.onDragKeyframe(draggingIdRef.current, { time: timeAtX(x) })
     } else if (isScrubbingRef.current) {
-      onSeek(timeAtX(x))
+      propsRef.current.onSeek(timeAtX(x))
     }
   }
 

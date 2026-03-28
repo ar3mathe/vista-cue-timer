@@ -28,6 +28,8 @@ export default function App() {
   const [sessionMatchStatus, setSessionMatchStatus] = useState(null)
 
   const objectUrlRef = useRef(null)
+  const sourceModeRef = useRef(sourceMode)
+  sourceModeRef.current = sourceMode
 
   const { getAudioContext } = useAudioContext()
   const { waveformData, audioBuffer, isDecoding, decodeError } = useWaveform({ sourceFile, getAudioContext })
@@ -137,12 +139,15 @@ export default function App() {
   }, [])
 
   const handleSeek = useCallback((time) => {
-    if (sourceMode === 'blank') {
+    // Read sourceMode via ref so this callback never has a stale closure —
+    // a stale 'blank' mode would route seeks through blankTimer.seek which
+    // clamps to blankDuration (default 60 s), breaking video/audio scrubbing.
+    if (sourceModeRef.current === 'blank') {
       blankTimer.seek(time)
     } else {
       setSeekTo(time)
     }
-  }, [sourceMode, blankTimer])
+  }, [blankTimer])
 
   const handleSeekHandled = useCallback(() => setSeekTo(null), [])
 

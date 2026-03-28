@@ -267,6 +267,7 @@ export default function App() {
             currentTime={displayCurrentTime}
             onUpdate={updateKeyframe}
             onDelete={deleteKeyframe}
+            onClearAll={() => setKeyframes([])}
             onSeek={handleSeek}
           />
         </aside>

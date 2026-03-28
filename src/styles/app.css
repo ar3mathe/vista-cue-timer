@@ -57,10 +57,7 @@ body {
 }
 
 .toolbar-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  display: none;
 }
 
 .main-layout {
@@ -365,10 +362,16 @@ body {
 .panel-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px 10px;
+  gap: 8px;
+  padding: 10px 16px 9px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.panel-clear-btn {
+  margin-left: auto;
+  padding: 3px 9px;
+  font-size: 11px;
 }
 
 .panel-title {
@@ -1170,7 +1173,7 @@ kbd {
   /* ── Floating pill: fixed above the Add Keyframe button on mobile ── */
   .video-controls {
     position: fixed;
-    bottom: 82px;
+    bottom: 110px;
     left: 12px;
     right: 12px;
     z-index: 140;
@@ -1179,8 +1182,8 @@ kbd {
   /* ── Waveform ── */
   .waveform-container {
     flex: none;
-    height: 110px;
-    min-height: 110px;
+    height: 180px;
+    min-height: 180px;
   }
 
   /* Fixed pill at bottom-center of screen on mobile */
@@ -1198,8 +1201,8 @@ kbd {
   .add-keyframe-btn:hover  { transform: translateX(-50%) translateY(-2px); }
   .add-keyframe-btn:active { transform: translateX(-50%) translateY(0); }
 
-  /* Extra bottom padding so the ruler isn't hidden behind the fixed button */
-  .waveform-container { padding-bottom: 72px; }
+  /* Extra bottom padding so the ruler isn't hidden behind the fixed buttons */
+  .waveform-container { padding-bottom: 160px; }
 
   .show-beats-btn { top: 6px; right: 8px; bottom: auto; }
 
@@ -1230,7 +1233,7 @@ kbd {
   .blank-form-preview { order: 3; font-size: 11px; }
 
   /* ── Keyframe panel ── */
-  .keyframe-panel { min-height: 240px; }
+  .keyframe-panel { min-height: 180px; }
   .keyframe-row { padding: 8px 10px 8px 10px; }
   .kf-label-line { padding-left: 22px; }
   .kf-row-bottom { padding-left: 22px; flex-wrap: wrap; gap: 5px; }

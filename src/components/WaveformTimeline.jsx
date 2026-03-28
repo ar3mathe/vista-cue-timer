@@ -214,8 +214,8 @@ export default function WaveformTimeline({
       }
     }
 
-    // Time axis — dot-and-bar ruler
-    if (duration > 0) {
+    // Time axis — dot-and-bar ruler (skip in blank mode; it draws its own ruler above)
+    if (sourceMode !== 'blank' && duration > 0) {
       const majorInterval = computeTickInterval(duration, W)
       const subInterval = majorInterval / 2
 

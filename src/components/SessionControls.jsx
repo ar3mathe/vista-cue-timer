@@ -80,7 +80,7 @@ export default function SessionControls({
       <button className="btn btn-secondary" onClick={handleSave} disabled={keyframes.length === 0}>
         Save
       </button>
-      <button className="btn btn-secondary" onClick={handleExportCsv} disabled={keyframes.length === 0}>
+      <button className="btn btn-secondary mobile-hidden" onClick={handleExportCsv} disabled={keyframes.length === 0}>
         Export CSV
       </button>
       <button className="btn btn-secondary" onClick={handleLoadClick}>

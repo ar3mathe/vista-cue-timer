@@ -76,29 +76,11 @@ export default function VideoUploader({ onFileSelected, onStartBlank }) {
 
   return (
     <div className="uploader-wrap">
-      <div
-        className={`drop-zone ${isDragActive ? 'drop-zone--active' : ''}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPTED}
-          style={{ display: 'none' }}
-          onChange={handleInputChange}
-        />
-        <div className="drop-zone-icon">🎬</div>
-        <p className="drop-zone-text">Drop a video or audio file here, or click to browse</p>
-        <p className="drop-zone-hint">Video: mp4, mov, webm — Audio: mp3, wav, aac, flac, aiff</p>
-      </div>
-
+      {/* Blank timeline — desktop: below drop zone; mobile: above via CSS order */}
       <div className="blank-timeline-section">
         {!showBlankForm ? (
           <button
-            className="btn btn-secondary blank-timeline-btn"
+            className="btn blank-timeline-btn"
             onClick={() => setShowBlankForm(true)}
           >
             ⏱ Start with a blank timeline
@@ -119,11 +101,7 @@ export default function VideoUploader({ onFileSelected, onStartBlank }) {
                 {isValidDuration ? formatPreview(parsedSecs) : 'min 10s, max 3h'}
               </span>
             )}
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={!isValidDuration}
-            >
+            <button type="submit" className="btn btn-primary" disabled={!isValidDuration}>
               Start
             </button>
             <button
@@ -135,6 +113,25 @@ export default function VideoUploader({ onFileSelected, onStartBlank }) {
             </button>
           </form>
         )}
+      </div>
+
+      <div
+        className={`drop-zone ${isDragActive ? 'drop-zone--active' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => inputRef.current?.click()}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPTED}
+          style={{ display: 'none' }}
+          onChange={handleInputChange}
+        />
+        <div className="drop-zone-icon">🎬</div>
+        <p className="drop-zone-text">Drop a video or audio file, or tap to browse</p>
+        <p className="drop-zone-hint">Video: mp4, mov, webm — Audio: mp3, wav, aac, flac, aiff</p>
       </div>
     </div>
   )

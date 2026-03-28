@@ -815,8 +815,11 @@ kbd {
   display: flex;
   justify-content: center;
   padding: 0 24px 20px;
+  /* Desktop: below the drop zone (natural DOM order) */
+  order: 2;
 }
 
+/* Desktop: subtle dashed secondary style */
 .blank-timeline-btn {
   width: 100%;
   font-size: 13px;
@@ -832,6 +835,9 @@ kbd {
   border-color: var(--accent);
   border-style: solid;
 }
+
+/* Drop zone DOM order: desktop first (natural) */
+.drop-zone { order: 1; }
 
 .blank-form {
   display: flex;
@@ -926,4 +932,116 @@ kbd {
   font-size: 13px;
   padding: 4px 8px;
   flex-shrink: 0;
+}
+
+/* ─── Mobile responsive (≤ 768px) ───────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Allow page to scroll on mobile */
+  html, body, #root { overflow: auto; height: auto; min-height: 100%; }
+  .app { height: auto; min-height: 100dvh; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    height: auto;
+    min-height: 48px;
+    padding: 8px 12px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .toolbar-brand { font-size: 14px; }
+
+  /* Hide desktop-only controls */
+  .timecode-toolbar,
+  .metronome,
+  .toolbar-divider,
+  .mobile-hidden { display: none !important; }
+
+  /* Session controls compact */
+  .session-controls { gap: 5px; }
+  .session-controls .btn { padding: 5px 10px; font-size: 12px; }
+  .session-badge { display: none; }
+
+  /* ── Main layout: single column ── */
+  .main-layout {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    flex: none;
+  }
+
+  .left-column {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow: visible;
+    flex-shrink: 0;
+  }
+
+  .right-column {
+    overflow: visible;
+    flex: none;
+    background: var(--bg-2);
+  }
+
+  /* ── Video & audio player ── */
+  .video-element { max-height: 200px; }
+
+  .video-controls { gap: 7px; padding: 6px 10px; }
+  .time-display { min-width: 72px; font-size: 12px; }
+  .time-total { font-size: 11px; }
+
+  /* ── Waveform ── */
+  .waveform-container {
+    flex: none;
+    height: 110px;
+    min-height: 110px;
+  }
+
+  .add-keyframe-btn {
+    padding: 8px 13px;
+    font-size: 13px;
+    bottom: 30px;
+    right: 8px;
+  }
+
+  .show-beats-btn {
+    bottom: 30px;
+    right: 130px;
+  }
+
+  /* ── Uploader: blank timeline FIRST on mobile ── */
+  .blank-timeline-section { order: 1; padding: 16px 16px 8px; }
+  .drop-zone              { order: 2; margin: 8px 16px 16px; padding: 28px 16px; }
+
+  /* Blank button: prominent primary style on mobile */
+  .blank-timeline-btn {
+    border-style: solid;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 13px 20px;
+    justify-content: center;
+  }
+  .blank-timeline-btn:hover {
+    background: #5aabff;
+    border-color: #5aabff;
+    color: #fff;
+  }
+
+  /* Blank form wraps on small screens */
+  .blank-form { flex-wrap: wrap; gap: 8px; }
+  .blank-form-input { flex: 1 1 100%; }
+  .blank-form-preview { order: 3; font-size: 11px; }
+
+  /* ── Keyframe panel ── */
+  .keyframe-panel { min-height: 240px; }
+  .keyframe-row { padding: 8px 10px 8px 10px; }
+  .kf-label-line { padding-left: 22px; }
+  .kf-row-bottom { padding-left: 22px; flex-wrap: wrap; gap: 5px; }
+  .kf-nudge { gap: 4px; }
+
+  /* ── Blank mode controls ── */
+  .video-player--blank .video-controls { flex-wrap: wrap; gap: 6px; }
 }

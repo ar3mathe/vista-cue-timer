@@ -175,7 +175,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="toolbar">
-        <div className="toolbar-brand">Vista Cue Timer</div>
+        <div className="toolbar-brand">myCue</div>
         <TimecodeToolbar
           displayMode={displayMode}
           frameRate={frameRate}

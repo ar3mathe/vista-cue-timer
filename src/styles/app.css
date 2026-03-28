@@ -563,14 +563,18 @@ kbd {
   background: none;
   border: none;
   color: #555;
-  font-size: 18px;
+  font-size: 22px;
   cursor: pointer;
-  padding: 0 2px;
+  padding: 0 6px;
   line-height: 1;
   transition: color 0.1s;
   flex-shrink: 0;
 }
 .kf-delete:hover { color: var(--danger); }
+
+@media (max-width: 768px) {
+  .kf-delete { font-size: 26px; padding: 0 8px; }
+}
 
 /* .kf-row-label replaced by .kf-label-line (colour dot + label in one row) */
 

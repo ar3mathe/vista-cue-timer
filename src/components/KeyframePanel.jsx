@@ -27,6 +27,8 @@ export default function KeyframePanel({
   const [durDraft, setDurDraft]         = useState('')
   const [openColorId, setOpenColorId]   = useState(null)
   const [popupPos, setPopupPos]         = useState({ top: 0, left: 0 })
+  const [labelModalId, setLabelModalId] = useState(null)
+  const [labelModalDraft, setLabelModalDraft] = useState('')
 
   // Close colour popup on outside click
   useEffect(() => {
@@ -74,6 +76,24 @@ export default function KeyframePanel({
     if (!kf) return
     const newTime = Math.max(0, Math.min(videoDuration, kf.time + delta))
     onUpdate(id, { time: newTime })
+  }
+
+  function openLabelModal(kf) {
+    setLabelModalDraft(kf.label)
+    setLabelModalId(kf.id)
+  }
+
+  function submitLabelModal() {
+    if (labelModalId) onUpdate(labelModalId, { label: labelModalDraft })
+    setLabelModalId(null)
+  }
+
+  function handleLabelClick(e, kf) {
+    if (window.innerWidth <= 768) {
+      e.preventDefault()
+      e.currentTarget.blur()
+      openLabelModal(kf)
+    }
   }
 
   function handleColorDotClick(e, kfId) {
@@ -132,7 +152,9 @@ export default function KeyframePanel({
                     className="kf-label-input"
                     value={kf.label}
                     placeholder="Cue label…"
+                    readOnly={window.innerWidth <= 768}
                     onChange={e => onUpdate(kf.id, { label: e.target.value })}
+                    onClick={e => handleLabelClick(e, kf)}
                   />
                 </div>
 
@@ -166,6 +188,42 @@ export default function KeyframePanel({
           })}
         </ul>
       )}
+
+      {/* Label edit modal — used on mobile instead of inline editing */}
+      {labelModalId && (() => {
+        const kf = keyframes.find(k => k.id === labelModalId)
+        return (
+          <div className="modal-overlay" onMouseDown={() => setLabelModalId(null)}>
+            <div className="modal-card" onMouseDown={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2 className="modal-title">Edit cue label</h2>
+                <button className="modal-close-btn" onClick={() => setLabelModalId(null)}>×</button>
+              </div>
+              <div className="modal-body">
+                {kf && <p className="modal-desc" style={{ fontFamily: 'Courier New', color: kf.color || '#ff6b35' }}>
+                  Cue {keyframes.indexOf(kf) + 1}
+                </p>}
+                <input
+                  type="text"
+                  className="modal-input"
+                  value={labelModalDraft}
+                  placeholder="Cue label…"
+                  autoFocus
+                  onChange={e => setLabelModalDraft(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') submitLabelModal()
+                    if (e.key === 'Escape') setLabelModalId(null)
+                  }}
+                />
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setLabelModalId(null)}>Cancel</button>
+                <button className="btn btn-primary" onClick={submitLabelModal}>Save</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Colour popup — rendered at fixed position to escape overflow clipping */}
       {openColorId && (() => {

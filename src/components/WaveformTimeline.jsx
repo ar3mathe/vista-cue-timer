@@ -87,6 +87,7 @@ export default function WaveformTimeline({
 
   const isDraggingKeyframeRef = useRef(false)
   const draggingIdRef = useRef(null)
+  const isScrubbingRef = useRef(false)
 
   const propsRef = useRef({})
   propsRef.current = { waveformData, keyframes, currentTime, duration, displayMode, frameRate, isDecoding, decodeError, beatPositions, showBeats, sourceMode }
@@ -424,6 +425,13 @@ export default function WaveformTimeline({
     return null
   }
 
+  function isNearPlayhead(x) {
+    const { currentTime, duration } = propsRef.current
+    if (!duration) return false
+    const W = canvasRef.current.clientWidth
+    return Math.abs(x - (currentTime / duration) * W) <= 10
+  }
+
   function handleMouseDown(e) {
     if (e.button !== 0) return
     const x = getCanvasX(e)
@@ -432,27 +440,72 @@ export default function WaveformTimeline({
       isDraggingKeyframeRef.current = true
       draggingIdRef.current = hitId
     } else if (duration > 0) {
+      isScrubbingRef.current = true
       onSeek(timeAtX(x))
     }
   }
 
   function handleMouseMove(e) {
-    // Update cursor
     const canvas = canvasRef.current
-    if (canvas) {
-      const x = getCanvasX(e)
-      const hitId = hitTestKeyframe(x)
-      canvas.style.cursor = isDraggingKeyframeRef.current ? 'grabbing' : hitId ? 'grab' : 'crosshair'
-    }
-    // Drag
-    if (!isDraggingKeyframeRef.current) return
     const x = getCanvasX(e)
-    onDragKeyframe(draggingIdRef.current, { time: timeAtX(x) })
+    // Update cursor
+    if (canvas) {
+      const hitId = hitTestKeyframe(x)
+      canvas.style.cursor =
+        isDraggingKeyframeRef.current ? 'grabbing'
+        : isScrubbingRef.current     ? 'ew-resize'
+        : hitId                      ? 'grab'
+        : isNearPlayhead(x)          ? 'ew-resize'
+        : 'crosshair'
+    }
+    // Drag keyframe
+    if (isDraggingKeyframeRef.current) {
+      onDragKeyframe(draggingIdRef.current, { time: timeAtX(x) })
+    }
+    // Scrub playhead
+    if (isScrubbingRef.current) {
+      onSeek(timeAtX(x))
+    }
   }
 
   function handleMouseUp() {
     isDraggingKeyframeRef.current = false
     draggingIdRef.current = null
+    isScrubbingRef.current = false
+  }
+
+  // ── Touch support (mobile scrub + keyframe drag) ──────────────────────────
+  function getTouchX(e) {
+    return e.touches[0].clientX - canvasRef.current.getBoundingClientRect().left
+  }
+
+  function handleTouchStart(e) {
+    const x = getTouchX(e)
+    const hitId = hitTestKeyframe(x)
+    if (hitId) {
+      isDraggingKeyframeRef.current = true
+      draggingIdRef.current = hitId
+    } else if (duration > 0) {
+      isScrubbingRef.current = true
+      onSeek(timeAtX(x))
+    }
+  }
+
+  function handleTouchMove(e) {
+    if (!isDraggingKeyframeRef.current && !isScrubbingRef.current) return
+    e.preventDefault()
+    const x = getTouchX(e)
+    if (isDraggingKeyframeRef.current) {
+      onDragKeyframe(draggingIdRef.current, { time: timeAtX(x) })
+    } else if (isScrubbingRef.current) {
+      onSeek(timeAtX(x))
+    }
+  }
+
+  function handleTouchEnd() {
+    isDraggingKeyframeRef.current = false
+    draggingIdRef.current = null
+    isScrubbingRef.current = false
   }
 
   const showAddButton = (hasVideo || sourceMode === 'blank') && onAddKeyframe
@@ -466,6 +519,10 @@ export default function WaveformTimeline({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ touchAction: 'none' }}
       />
       {showAddButton && (
         <button

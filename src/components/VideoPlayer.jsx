@@ -1,6 +1,14 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import { formatTime } from '../utils/formatTime.js'
 
+// Compact MM:SS (no milliseconds) for the pill controls
+function formatCompact(t) {
+  if (!Number.isFinite(t) || t < 0) return '0:00'
+  const m = Math.floor(t / 60)
+  const s = Math.floor(t % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
 function parseDurationInput(str) {
   const trimmed = (str || '').trim()
   const colonMatch = trimmed.match(/^(\d+):(\d{1,2})(?:\.(\d+))?$/)
@@ -18,14 +26,12 @@ function parseDurationInput(str) {
 export default function VideoPlayer({
   sourceObjectUrl,
   sourceMode,
-  fileName,
   displayMode,
   frameRate,
   seekTo,
   onSeekHandled,
   onDurationChange,
   onTimeUpdate,
-  onAddKeyframe,
   // Blank mode props
   blankIsPlaying,
   blankElapsed,
@@ -37,15 +43,14 @@ export default function VideoPlayer({
   onRemove,
 }) {
   const mediaRef = useRef(null)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPlaying, setIsPlaying]   = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
+  const [duration, setDuration]     = useState(0)
 
-  // Blank duration editing state
+  // Inline duration-edit state (blank mode)
   const [editingDuration, setEditingDuration] = useState(false)
   const [durationInputVal, setDurationInputVal] = useState('')
 
-  // Set src directly on DOM element to avoid double-decode
   useEffect(() => {
     const media = mediaRef.current
     if (!media) return
@@ -97,33 +102,19 @@ export default function VideoPlayer({
     function onKeyDown(e) {
       const tag = document.activeElement?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
-
       if (e.code === 'Space') {
         e.preventDefault()
-        if (sourceMode === 'blank') {
-          onBlankPlayPause?.()
-        } else {
-          handlePlayPause()
-        }
+        sourceMode === 'blank' ? onBlankPlayPause?.() : handlePlayPause()
       } else if (e.code === 'ArrowLeft') {
         e.preventDefault()
-        if (sourceMode === 'blank') {
-          onBlankSeek?.(Math.max(0, (blankElapsed ?? 0) - 5))
-        } else {
-          const media = mediaRef.current
-          if (media) media.currentTime = Math.max(0, media.currentTime - 5)
-        }
+        if (sourceMode === 'blank') onBlankSeek?.(Math.max(0, (blankElapsed ?? 0) - 5))
+        else { const m = mediaRef.current; if (m) m.currentTime = Math.max(0, m.currentTime - 5) }
       } else if (e.code === 'ArrowRight') {
         e.preventDefault()
-        if (sourceMode === 'blank') {
-          onBlankSeek?.(Math.min(blankDuration ?? 0, (blankElapsed ?? 0) + 5))
-        } else {
-          const media = mediaRef.current
-          if (media) media.currentTime = Math.min(media.duration || 0, media.currentTime + 5)
-        }
+        if (sourceMode === 'blank') onBlankSeek?.(Math.min(blankDuration ?? 0, (blankElapsed ?? 0) + 5))
+        else { const m = mediaRef.current; if (m) m.currentTime = Math.min(m.duration || 0, m.currentTime + 5) }
       }
     }
-
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [sourceMode, handlePlayPause, onBlankPlayPause, onBlankSeek, blankElapsed, blankDuration])
@@ -132,7 +123,7 @@ export default function VideoPlayer({
     ref: mediaRef,
     onLoadedMetadata: handleLoadedMetadata,
     onTimeUpdate: handleTimeUpdate,
-    onPlay: () => setIsPlaying(true),
+    onPlay:  () => setIsPlaying(true),
     onPause: () => setIsPlaying(false),
     onEnded: () => setIsPlaying(false),
   }
@@ -146,73 +137,64 @@ export default function VideoPlayer({
     }
   }
 
-  // ── Blank mode ─────────────────────────────────────────────────────────────
+  // ── Blank mode ──────────────────────────────────────────────────────────────
   if (sourceMode === 'blank') {
+    const elapsed  = blankElapsed  ?? 0
+    const total    = blankDuration ?? 0
+    const pct      = total > 0 ? `${((elapsed / total) * 100).toFixed(2)}%` : '0%'
+
     return (
       <div className="video-player video-player--blank">
         <div className="video-controls">
-          <button className="play-pause-btn" onClick={onBlankPlayPause}>
+          {/* Play / pause */}
+          <button className="play-pause-btn" onClick={onBlankPlayPause}
+            aria-label={blankIsPlaying ? 'Pause' : 'Play'}>
             {blankIsPlaying ? '⏸' : '▶'}
           </button>
 
-          <span className="time-display">
-            {formatTime(blankElapsed ?? 0, displayMode, frameRate)}
-          </span>
+          {/* Current time */}
+          <span className="time-display">{formatCompact(elapsed)}</span>
 
-          <input
-            type="range"
-            className="scrubber"
-            min={0}
-            max={blankDuration || 0}
-            step={0.01}
-            value={blankElapsed ?? 0}
+          {/* Scrubber */}
+          <input type="range" className="scrubber"
+            min={0} max={total} step={0.01} value={elapsed}
+            style={{ '--scrubber-pct': pct }}
             onChange={e => onBlankSeek?.(Number(e.target.value))}
           />
 
+          {/* Total / editable duration */}
           {editingDuration ? (
             <form className="blank-duration-edit" onSubmit={handleDurationEditSubmit}>
-              <input
-                type="text"
-                className="blank-duration-input"
-                value={durationInputVal}
-                placeholder="e.g. 2:30"
+              <input type="text" className="blank-duration-input"
+                value={durationInputVal} placeholder="e.g. 2:30"
                 onChange={e => setDurationInputVal(e.target.value)}
                 autoFocus
               />
               <button type="submit" className="btn btn-primary blank-dur-confirm">✓</button>
-              <button type="button" className="btn btn-secondary blank-dur-cancel" onClick={() => setEditingDuration(false)}>✕</button>
+              <button type="button" className="btn btn-secondary blank-dur-cancel"
+                onClick={() => setEditingDuration(false)}>✕</button>
             </form>
           ) : (
-            <span
-              className="time-total blank-total-clickable"
+            <span className="time-total blank-total-clickable"
               onClick={() => { setDurationInputVal(''); setEditingDuration(true) }}
-              title="Click to change duration"
-            >
-              {formatTime(blankDuration ?? 0, displayMode, frameRate)}
+              title="Tap to change duration">
+              {formatCompact(total)}
             </span>
           )}
 
-          <button
-            className="btn btn-secondary blank-reset-btn"
-            onClick={onBlankReset}
-            title="Reset to start"
-          >
-            ↺
-          </button>
+          {/* Reset */}
+          <button className="ctrl-icon-btn" onClick={onBlankReset} title="Reset to start">↺</button>
 
-          <button
-            className="btn btn-danger blank-remove-btn"
-            onClick={onRemove}
-            title="Remove blank timeline"
-          >
-            ✕
-          </button>
+          {/* Remove */}
+          <button className="ctrl-icon-btn ctrl-icon-btn--danger" onClick={onRemove} title="Remove">✕</button>
         </div>
       </div>
     )
   }
 
   // ── File modes (video / audio) ──────────────────────────────────────────────
+  const pct = duration > 0 ? `${((currentTime / duration) * 100).toFixed(2)}%` : '0%'
+
   return (
     <div className="video-player">
       {sourceMode === 'audio' ? (
@@ -222,36 +204,28 @@ export default function VideoPlayer({
       )}
 
       <div className="video-controls">
-        <button className="play-pause-btn" onClick={handlePlayPause}>
+        {/* Play / pause */}
+        <button className="play-pause-btn" onClick={handlePlayPause}
+          aria-label={isPlaying ? 'Pause' : 'Play'}>
           {isPlaying ? '⏸' : '▶'}
         </button>
 
-        <span className="time-display">
-          {formatTime(currentTime, displayMode, frameRate)}
-        </span>
+        {/* Current time */}
+        <span className="time-display">{formatCompact(currentTime)}</span>
 
-        <input
-          type="range"
-          className="scrubber"
-          min={0}
-          max={duration || 0}
-          step={0.001}
-          value={currentTime}
+        {/* Scrubber */}
+        <input type="range" className="scrubber"
+          min={0} max={duration || 0} step={0.001} value={currentTime}
+          style={{ '--scrubber-pct': pct }}
           onChange={handleScrubChange}
         />
 
-        <span className="time-total">
-          {formatTime(duration, displayMode, frameRate)}
-        </span>
+        {/* Total time */}
+        <span className="time-total">{formatCompact(duration)}</span>
 
+        {/* Remove */}
         {onRemove && (
-          <button
-            className="btn btn-danger blank-remove-btn"
-            onClick={onRemove}
-            title="Remove file"
-          >
-            ✕
-          </button>
+          <button className="ctrl-icon-btn ctrl-icon-btn--danger" onClick={onRemove} title="Remove">✕</button>
         )}
       </div>
     </div>

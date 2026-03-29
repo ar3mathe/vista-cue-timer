@@ -315,6 +315,11 @@ body {
   min-height: 200px;
 }
 
+/* Audio/blank: no video element above, so give the waveform more room */
+.left-column:not(.left-column--video) .waveform-container {
+  min-height: 320px;
+}
+
 .waveform-canvas {
   display: block;
   width: 100%;
@@ -563,9 +568,9 @@ kbd {
   background: none;
   border: none;
   color: #555;
-  font-size: 22px;
+  font-size: 26px;
   cursor: pointer;
-  padding: 0 6px;
+  padding: 0 8px;
   line-height: 1;
   transition: color 0.1s;
   flex-shrink: 0;
@@ -573,7 +578,7 @@ kbd {
 .kf-delete:hover { color: var(--danger); }
 
 @media (max-width: 768px) {
-  .kf-delete { font-size: 26px; padding: 0 8px; }
+  .kf-delete { font-size: 32px; padding: 0 10px; }
 }
 
 /* .kf-row-label replaced by .kf-label-line (colour dot + label in one row) */
@@ -1190,6 +1195,11 @@ kbd {
     flex: none;
     height: 260px;
     min-height: 260px;
+  }
+  /* Audio / blank: no video element above, so allow taller waveform */
+  .left-column:not(.left-column--video) .waveform-container {
+    height: 360px;
+    min-height: 360px;
   }
 
   /* Fixed pill at bottom-center of screen on mobile */

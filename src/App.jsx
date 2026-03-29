@@ -224,7 +224,7 @@ export default function App() {
       </header>
 
       <main className="main-layout">
-        <div className="left-column">
+        <div className={`left-column${sourceMode === 'video' ? ' left-column--video' : ''}`}>
           {sourceMode === 'blank' ? (
             <VideoPlayer
               sourceMode="blank"
